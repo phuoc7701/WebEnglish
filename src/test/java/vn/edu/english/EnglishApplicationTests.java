@@ -1,4 +1,4 @@
-package vn.edu.English;
+package vn.edu.english;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
