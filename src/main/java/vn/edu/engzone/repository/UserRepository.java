@@ -1,6 +1,6 @@
 package vn.edu.engzone.repository;
 
-import com.devteria.identity_service.entity.User;
+import vn.edu.engzone.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,9 +1,9 @@
 package vn.edu.engzone.mapper;
 
-import com.devteria.identity_service.dto.request.UserCreationRequest;
-import com.devteria.identity_service.dto.request.UserUpdateRequest;
-import com.devteria.identity_service.dto.response.UserResponse;
-import com.devteria.identity_service.entity.User;
+import vn.edu.engzone.dto.request.UserCreationRequest;
+import vn.edu.engzone.dto.request.UserUpdateRequest;
+import vn.edu.engzone.dto.response.UserResponse;
+import vn.edu.engzone.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
