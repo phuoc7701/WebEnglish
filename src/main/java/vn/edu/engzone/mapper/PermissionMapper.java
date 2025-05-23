@@ -1,8 +1,8 @@
 package vn.edu.engzone.mapper;
 
-import com.devteria.identity_service.dto.request.PermissionRequest;
-import com.devteria.identity_service.dto.response.PermissionResponse;
-import com.devteria.identity_service.entity.Permission;
+import vn.edu.engzone.dto.request.PermissionRequest;
+import vn.edu.engzone.dto.response.PermissionResponse;
+import vn.edu.engzone.entity.Permission;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")

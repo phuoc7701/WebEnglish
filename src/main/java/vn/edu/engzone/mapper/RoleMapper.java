@@ -1,8 +1,8 @@
 package vn.edu.engzone.mapper;
 
-import com.devteria.identity_service.dto.request.RoleRequest;
-import com.devteria.identity_service.dto.response.RoleResponse;
-import com.devteria.identity_service.entity.Role;
+import vn.edu.engzone.dto.request.RoleRequest;
+import vn.edu.engzone.dto.response.RoleResponse;
+import vn.edu.engzone.entity.Role;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

@@ -3,7 +3,7 @@ package vn.edu.engzone.controller;
 import vn.edu.engzone.dto.request.ApiResponse;
 import vn.edu.engzone.dto.request.PermissionRequest;
 import vn.edu.engzone.dto.response.PermissionResponse;
-import vn.edu.engzone.dto.PermissionService;
+import vn.edu.engzone.service.PermissionService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
