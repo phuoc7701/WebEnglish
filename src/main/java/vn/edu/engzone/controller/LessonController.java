@@ -4,12 +4,15 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.engzone.dto.request.LessonCreateRequest;
+import vn.edu.engzone.dto.request.LessonUpdateRequest;
 import vn.edu.engzone.dto.response.LessonResponse;
 import vn.edu.engzone.service.LessonService;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -20,8 +23,8 @@ import java.util.List;
 public class LessonController {
     LessonService lessonService;
 
-    @PostMapping
-    public ResponseEntity<LessonResponse> create(@RequestBody LessonCreateRequest request) {
+    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<LessonResponse> create(@ModelAttribute LessonCreateRequest request) throws IOException {
         return ResponseEntity.ok(lessonService.createLesson(request));
     }
 
@@ -35,8 +38,8 @@ public class LessonController {
         return ResponseEntity.ok(lessonService.getLessonById(id));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<LessonResponse> update(@PathVariable String id, @RequestBody LessonCreateRequest request) {
+    @PutMapping(value = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<LessonResponse> update(@PathVariable String id, @ModelAttribute LessonUpdateRequest request) throws IOException {
         return ResponseEntity.ok(lessonService.updateLesson(id, request));
     }
 
