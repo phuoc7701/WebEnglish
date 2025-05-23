@@ -21,6 +21,7 @@
 //
 //    private String name;
 //
-//    @ManyToMany(mappedBy = "topics")
-//    private List<Lesson> lessons;
+////    @ManyToMany(mappedBy = "topics")
+////    private List<Lesson> lessons;
+//
 //}

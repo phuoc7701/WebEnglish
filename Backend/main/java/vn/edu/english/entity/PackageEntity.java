@@ -6,11 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Package")
+@Table(name = "package_table")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Packages {
+public class PackageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "package_id")
@@ -21,7 +21,7 @@ public class Packages {
 
     private String description;
 
-    @Column(name = "duration", nullable = false, unique = true)
+    @Column(name = "duration", nullable = false)
     private int duration;
 
     private String status;

@@ -26,12 +26,12 @@
 //    private String lessonType;
 //    private String packageRequired;
 //
-//    @ManyToMany
-//    @JoinTable(
-//            name = "lesson_topic",
-//            joinColumns = @JoinColumn(name = "lesson_id"),
-//            inverseJoinColumns = @JoinColumn(name = "topic_id")
-//    )
-//    private List<Topic> topics;
+////    @ManyToMany
+////    @JoinTable(
+////            name = "lesson_topic",
+////            joinColumns = @JoinColumn(name = "lesson_id"),
+////            inverseJoinColumns = @JoinColumn(name = "topic_id")
+////    )
+////    private List<Topic> topics;
 //
 //}

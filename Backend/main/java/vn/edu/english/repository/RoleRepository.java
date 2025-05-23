@@ -1,4 +1,8 @@
 package vn.edu.english.repository;
 
-public class RoleRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import vn.edu.english.entity.Role;
+
+
+public interface RoleRepository extends JpaRepository<Role,Long> {
 }

@@ -2,8 +2,10 @@ package vn.edu.english.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -11,13 +13,15 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable() // Tắt CSRF nếu gọi từ Postman / client JS
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/**").permitAll() // <-- Cho phép mọi người gọi các API nội bộ
-                        .anyRequest().authenticated()
-                );
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll() // Cho phép tất cả truy cập
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Có thể giữ nguyên nếu bạn không dùng session
+                .httpBasic(Customizer.withDefaults()); // Hoặc có thể bỏ luôn nếu không dùng HTTP Basic
 
         return http.build();
     }
