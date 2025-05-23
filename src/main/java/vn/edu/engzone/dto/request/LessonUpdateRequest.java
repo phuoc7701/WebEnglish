@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LessonCreateRequest {
+public class LessonUpdateRequest {
     String title;
     String description;
     String videoUrl;
@@ -18,6 +18,5 @@ public class LessonCreateRequest {
     String type;
     String imageUrl;
     boolean isPackageRequired;
-    String createdBy;
     String updatedBy;
 }
