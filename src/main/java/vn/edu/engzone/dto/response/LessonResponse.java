@@ -17,9 +17,9 @@ public class LessonResponse {
     String videoUrl;
     String level;
     String type;
-    String imageUrl;
     boolean isPackageRequired;
     LocalDateTime createdAt;
+    String createdBy;
     LocalDateTime updatedAt;
     String updatedBy;
 }

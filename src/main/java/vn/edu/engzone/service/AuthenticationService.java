@@ -1,5 +1,8 @@
 package vn.edu.engzone.service;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import vn.edu.engzone.dto.request.AuthenticationRequest;
 import vn.edu.engzone.dto.request.IntrospectRequest;
 import vn.edu.engzone.dto.request.LogoutRequest;
@@ -188,4 +191,11 @@ public class AuthenticationService {
         return stringJoiner.toString();
     }
 
+    public String getCurrentAuthenticatedUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
+            return authentication.getName();
+        }
+        return null;
+    }
 }

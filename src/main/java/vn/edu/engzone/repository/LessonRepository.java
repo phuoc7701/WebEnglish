@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface LessonRepository extends JpaRepository<Lesson, String> {
-//    boolean existsByTitle(String title);
-//
-//    Optional<Lesson> findByTitle(String title);
+    boolean existsByTitle(String title);
+
+    Optional<Lesson> findByTitle(String title);
 }
