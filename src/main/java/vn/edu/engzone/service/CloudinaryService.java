@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import vn.edu.engzone.dto.response.CloudinaryResponse;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,11 +22,11 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UploadFileService {
+public class CloudinaryService {
 
     Cloudinary cloudinary;
 
-    public String uploadFile(MultipartFile file) throws IOException {
+    public CloudinaryResponse uploadFile(MultipartFile file) throws IOException {
         assert file.getOriginalFilename() != null;
         String publicValue = generatePublicValue(file.getOriginalFilename());
         log.info("Public Value: {}", publicValue);
@@ -34,16 +35,27 @@ public class UploadFileService {
         log.info("File uploaded path: {}", fileUploaded.getAbsolutePath());
 
         // Upload video
-        Map uploadResult = cloudinary.uploader().upload(fileUploaded, ObjectUtils.asMap(
+        Map uploadResultMap = cloudinary.uploader().upload(fileUploaded, ObjectUtils.asMap(
                 "public_id", publicValue,
                 "resource_type", "auto"
         ));
 
-        log.info("Cloudinary upload result: {}", uploadResult);
+        log.info("Cloudinary upload result: {}", uploadResultMap);
 
         cleanDisk(fileUploaded);
 
-        return uploadResult.get("secure_url").toString();
+        String actualPublicId = (String) uploadResultMap.get("public_id");
+        String secureUrl = (String) uploadResultMap.get("secure_url");
+
+        if (actualPublicId == null || secureUrl == null) {
+            log.error("Cloudinary upload failed to return public_id or secure_url. Result: {}", uploadResultMap);
+            // Bạn có thể throw một exception cụ thể hơn ở đây nếu muốn
+            throw new IOException("Cloudinary upload failed, missing public_id or secure_url in response.");
+        }
+
+        log.info("Uploaded to Cloudinary. Actual Public ID: {}, Secure URL: {}", actualPublicId, secureUrl);
+
+        return new CloudinaryResponse(actualPublicId, secureUrl);
     }
 
     private File convertToTempFile(MultipartFile file) throws IOException {
@@ -67,6 +79,9 @@ public class UploadFileService {
 
     public String generatePublicValue(String originalName) {
         String fileName = getFileName(originalName)[0];
+        if (fileName.isEmpty()) {
+            fileName = "untitled";
+        }
         return UUID.randomUUID().toString() + "_" + fileName;
     }
 
@@ -76,5 +91,18 @@ public class UploadFileService {
                 originalName.substring(0, lastDotIndex),
                 originalName.substring(lastDotIndex + 1)
         };
+    }
+
+    public void deleteFile(String publicId) {
+        try {
+            Map result = this.cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("resource_type", "video"));
+            log.info("Cloudinary delete result for publicId {}: {}", publicId, result);
+            if (result.get("result") == null || !result.get("result").equals("ok")) {
+                log.warn("Failed to delete file on Cloudinary or file not found. Public ID: {}, Result: {}", publicId, result);
+            }
+        } catch (Exception e) {
+            log.error("Error during Cloudinary file deletion for publicId: {}", publicId, e);
+            throw new RuntimeException("Failed to delete file from Cloudinary, publicId: " + publicId, e);
+        }
     }
 }

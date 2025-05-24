@@ -12,12 +12,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class LessonCreateRequest {
     String title;
     String description;
-    String videoUrl;
     MultipartFile videoFile;
     String level;
     String type;
-    String imageUrl;
     boolean isPackageRequired;
+//    String topics;
     String createdBy;
     String updatedBy;
 }

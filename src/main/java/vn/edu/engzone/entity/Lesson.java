@@ -41,6 +41,9 @@ public class Lesson {
     @Column(nullable = false)
     String videoUrl;
 
+    @Column(nullable = false)
+    String videoFileId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     Level level;
@@ -49,8 +52,6 @@ public class Lesson {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     LessonType type;
-
-    String imageUrl;
 
     @Column(nullable = false)
     boolean isPackageRequired;

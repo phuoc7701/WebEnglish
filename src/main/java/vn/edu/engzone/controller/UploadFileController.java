@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import vn.edu.engzone.service.UploadFileService;
+import vn.edu.engzone.dto.response.CloudinaryResponse;
+import vn.edu.engzone.service.CloudinaryService;
 
 import java.io.IOException;
 
@@ -18,10 +19,10 @@ import java.io.IOException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UploadFileController {
 
-    UploadFileService uploadFile;
+    CloudinaryService cloudinaryService;
 
     @PostMapping
-    public String uploadVideo(@RequestParam("file") MultipartFile file) throws IOException {
-        return uploadFile.uploadFile(file);
+    public CloudinaryResponse uploadVideo(@RequestParam("file") MultipartFile file) throws IOException {
+        return cloudinaryService.uploadFile(file);
     }
 }

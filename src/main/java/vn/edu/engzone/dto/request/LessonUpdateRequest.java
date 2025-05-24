@@ -16,7 +16,6 @@ public class LessonUpdateRequest {
     MultipartFile videoFile;
     String level;
     String type;
-    String imageUrl;
     boolean isPackageRequired;
     String updatedBy;
 }
