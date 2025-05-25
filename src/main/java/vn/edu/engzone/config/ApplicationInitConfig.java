@@ -2,7 +2,8 @@ package vn.edu.engzone.config;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import vn.edu.engzone.entity.User;
-import vn.edu.engzone.enums.Role;
+import vn.edu.engzone.entity.Role;
+import vn.edu.engzone.repository.RoleRepository;
 import vn.edu.engzone.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,18 +26,27 @@ public class ApplicationInitConfig {
     UserRepository userRepository;
 
     @Bean
-    ApplicationRunner applicationRunner() {
+    ApplicationRunner applicationRunner(RoleRepository roleRepository) {
         return args -> {
             if (userRepository.findByUsername("admin").isEmpty()) {
-                var roles = new HashSet<String>();
-                roles.add(Role.ADMIN.name());
+
+                Role adminRole = new Role();
+                adminRole.setName(vn.edu.engzone.enums.Role.ADMIN.name());
+                adminRole.setDescription("ssss");
+
+                var roles = new HashSet<Role>();
+                roles.add(adminRole);
 
                 User user = User.builder()
                         .username("admin")
                         .password(passwordEncoder.encode("admin"))
+                        .roles(roles)
                         .build();
 
                 userRepository.save(user);
+
+
+
                 log.warn("admin user has been created with default password: admin, please change it");
             }
         };
