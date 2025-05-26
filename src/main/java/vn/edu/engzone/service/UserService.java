@@ -44,10 +44,10 @@ public class UserService {
         // mã hóa mật khẩu cho user
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        HashSet<String> roles = new HashSet<>();
-        roles.add(Role.USER.name());
+        HashSet<vn.edu.engzone.entity.Role> roles = new HashSet<>();
+        roleRepository.findById(Role.USER.name()).ifPresent(roles::add);
 
-        //user.setRoles(roles);
+        user.setRoles(roles);
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
@@ -94,8 +94,8 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-//    @PreAuthorize("hasRole('ADMIN')") //kiểm tra trước khi vào method
-@PreAuthorize("hasAuthority('APPROVE_POST')")
+@PreAuthorize("hasRole('ADMIN')") //kiểm tra trước khi vào method
+//@PreAuthorize("hasAuthority('APPROVE_POST')")
     public List<UserResponse> getUsers(){
         log.info("In method get Users");
         return userRepository.findAll().stream()

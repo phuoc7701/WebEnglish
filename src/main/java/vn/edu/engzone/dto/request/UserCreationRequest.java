@@ -18,8 +18,8 @@ public class UserCreationRequest {
 
     @Size(min = 8, message = "INVALID_PASSWORD") //validate cho password
     String password;
-    String firstName;
-    String lastName;
+    String email;
+    String fullname;
 
     @DobConstraint(min = 2, message = "INVALID_DOB")
     LocalDate dob;
