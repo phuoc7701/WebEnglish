@@ -1,6 +1,5 @@
 package vn.edu.engzone.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -11,6 +10,8 @@ import vn.edu.engzone.dto.request.LessonUpdateRequest;
 import vn.edu.engzone.dto.response.CloudinaryResponse;
 import vn.edu.engzone.dto.response.LessonResponse;
 import vn.edu.engzone.entity.Lesson;
+import vn.edu.engzone.enums.LessonType;
+import vn.edu.engzone.enums.Level;
 import vn.edu.engzone.mapper.LessonMapper;
 import vn.edu.engzone.repository.LessonRepository;
 
@@ -28,22 +29,13 @@ public class LessonService {
     LessonRepository lessonRepository;
     LessonMapper lessonMapper;
     CloudinaryService cloudinaryService;
-    ObjectMapper objectMapper;
     AuthenticationService authenticationService;
+
+    static String VIDEO_FOLDER = "engzone/lesson/video";
+    static String LESSON_VIDEO_PREFIX = "lesson_video";
 
     public LessonResponse createLesson(LessonCreateRequest request) throws IOException {
         Lesson lesson = lessonMapper.toLesson(request);
-
-        // Handle Video: upload file or use URL
-        if (request.getVideoFile() != null && !request.getVideoFile().isEmpty()) {
-            CloudinaryResponse uploadDetails = cloudinaryService.uploadFile(request.getVideoFile());
-
-            lesson.setVideoUrl(uploadDetails.getSecureUrl());
-            lesson.setVideoFileId(uploadDetails.getPublicId());
-
-        } else {
-            throw new IllegalArgumentException("Must provide videoFile or videoUrl");
-        }
 
         String authenticatedUser = authenticationService.getCurrentAuthenticatedUsername();
         String creator;
@@ -56,13 +48,30 @@ public class LessonService {
             creator = "unknown_user";
         }
         lesson.setCreatedBy(creator);
-
-
         initialUpdater = creator;
-
         lesson.setUpdatedBy(initialUpdater);
 
+        // Save lesson to generate ID
         lessonRepository.save(lesson);
+
+        // Handle video upload using lesson ID
+        if (request.getVideoFile() != null && !request.getVideoFile().isEmpty()) {
+            CloudinaryResponse uploadDetails = cloudinaryService.uploadFile(
+                    request.getVideoFile(),
+                    VIDEO_FOLDER,
+                    lesson.getLessonId(),
+                    LESSON_VIDEO_PREFIX
+            );
+
+            lesson.setVideoUrl(uploadDetails.getSecureUrl());
+            lesson.setVideoFileId(uploadDetails.getPublicId());
+
+            lessonRepository.save(lesson);
+        } else {
+            lessonRepository.delete(lesson); // Rollback if no video
+            throw new IllegalArgumentException("Must provide videoFile");
+        }
+
         return lessonMapper.toLessonResponse(lesson);
     }
 
@@ -70,6 +79,12 @@ public class LessonService {
         Lesson lesson = lessonRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Lesson not found"));
         return lessonMapper.toLessonResponse(lesson);
+    }
+
+    public List<LessonResponse> getLessonsByTypeAndLevel(LessonType type, Level level) {
+        return lessonRepository.findByTypeAndLevel(type, level).stream()
+                .map(lessonMapper::toLessonResponse)
+                .collect(Collectors.toList());
     }
 
     public List<LessonResponse> getAllLessons() {
@@ -86,18 +101,23 @@ public class LessonService {
 
         // Handle Video: upload file or use URL
         if (request.getVideoFile() != null && !request.getVideoFile().isEmpty()) {
-
             String oldVideoFileId = lesson.getVideoFileId();
             if (oldVideoFileId != null && !oldVideoFileId.isBlank()) {
                 try {
                     cloudinaryService.deleteFile(oldVideoFileId);
-                    log.info("Successfully deleted old video with publicId: {}", oldVideoFileId);
+//                    log.info("Successfully deleted old video with publicId: {}", oldVideoFileId);
                 } catch (Exception e) {
                     log.error("Could not delete old video with publicId: {}. Continuing with new video upload.", oldVideoFileId, e);
                 }
             }
 
-            CloudinaryResponse uploadDetails = cloudinaryService.uploadFile(request.getVideoFile());
+            CloudinaryResponse uploadDetails = cloudinaryService.uploadFile(
+                    request.getVideoFile(),
+                    VIDEO_FOLDER,
+                    lesson.getLessonId(),
+                    LESSON_VIDEO_PREFIX
+
+            );
 
             lesson.setVideoUrl(uploadDetails.getSecureUrl());
             lesson.setVideoFileId(uploadDetails.getPublicId());
@@ -112,7 +132,7 @@ public class LessonService {
             updater = authenticatedUser;
         } else {
             log.warn("The updater of the lesson is unknown. Set the default value to 'unknown_user'.");
-            updater = "unknown_user"; // Fallback
+            updater = "unknown_user";
         }
         lesson.setUpdatedBy(updater);
 
@@ -121,16 +141,21 @@ public class LessonService {
     }
 
     public void deleteLesson(String id) {
-        Optional<Lesson> lesson = lessonRepository.findById(id);
-        String videoFileId = lesson.get().getVideoFileId();
-        if (videoFileId != null && !videoFileId.isBlank()) {
-            try {
-                cloudinaryService.deleteFile(videoFileId);
-                log.info("Successfully deleted old video with publicId: {}", videoFileId);
-            } catch (Exception e) {
-                log.error("Could not delete old video with publicId: {}. Continuing with new video upload.", videoFileId, e);
+        Optional<Lesson> lessonOpt = lessonRepository.findById(id);
+        if (lessonOpt.isPresent()) {
+            Lesson lesson = lessonOpt.get();
+            String videoFileId = lesson.getVideoFileId();
+            if (videoFileId != null && !videoFileId.isBlank()) {
+                try {
+                    cloudinaryService.deleteFile(videoFileId);
+                    log.info("Successfully deleted video with publicId: {}", videoFileId);
+                } catch (Exception e) {
+                    log.error("Could not delete video with publicId: {}. Continuing with lesson deletion.", videoFileId, e);
+                }
             }
+            lessonRepository.deleteById(id);
+        } else {
+            throw new RuntimeException("Lesson not found");
         }
-        lessonRepository.deleteById(id);
     }
 }

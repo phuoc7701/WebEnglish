@@ -13,6 +13,7 @@ import vn.edu.engzone.entity.Lesson;
 public interface LessonMapper {
     Lesson toLesson(LessonCreateRequest request);
 
+    @Mapping(target = "isPackageRequired", source = "packageRequired")
     LessonResponse toLessonResponse(Lesson lesson);
 
     @Mappings({
