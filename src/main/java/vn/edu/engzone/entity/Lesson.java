@@ -72,12 +72,12 @@ public class Lesson {
     @Column(nullable = true, length = 36)
     String updatedBy;
 
-    @ManyToMany
-    @JoinTable(
-            name = "lesson_topic",
-            joinColumns = @JoinColumn(name = "lesson_id"),
-            inverseJoinColumns = @JoinColumn(name = "topic_id")
-    )
-    List<Topic> topics;
+//    @ManyToMany
+//    @JoinTable(
+//            name = "lesson_topic",
+//            joinColumns = @JoinColumn(name = "lesson_id"),
+//            inverseJoinColumns = @JoinColumn(name = "topic_id")
+//    )
+//    List<Topic> topics;
 
 }
