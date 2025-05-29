@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -26,21 +25,22 @@ public class CloudinaryService {
 
     Cloudinary cloudinary;
 
-    public CloudinaryResponse uploadFile(MultipartFile file) throws IOException {
+    public CloudinaryResponse uploadFile(MultipartFile file, String folder, String id, String prefix) throws IOException {
         assert file.getOriginalFilename() != null;
-        String publicValue = generatePublicValue(file.getOriginalFilename());
-        log.info("Public Value: {}", publicValue);
+        String publicValue = generatePublicValue(file.getOriginalFilename(), id, prefix);
+//        log.info("Public Value: {}", publicValue);
 
         File fileUploaded = convertToTempFile(file);
-        log.info("File uploaded path: {}", fileUploaded.getAbsolutePath());
+//        log.info("File uploaded path: {}", fileUploaded.getAbsolutePath());
 
-        // Upload video
+        // Upload video to specified folder
         Map uploadResultMap = cloudinary.uploader().upload(fileUploaded, ObjectUtils.asMap(
                 "public_id", publicValue,
+                "folder", folder,
                 "resource_type", "auto"
         ));
 
-        log.info("Cloudinary upload result: {}", uploadResultMap);
+//        log.info("Cloudinary upload result: {}", uploadResultMap);
 
         cleanDisk(fileUploaded);
 
@@ -49,11 +49,10 @@ public class CloudinaryService {
 
         if (actualPublicId == null || secureUrl == null) {
             log.error("Cloudinary upload failed to return public_id or secure_url. Result: {}", uploadResultMap);
-            // Bạn có thể throw một exception cụ thể hơn ở đây nếu muốn
             throw new IOException("Cloudinary upload failed, missing public_id or secure_url in response.");
         }
 
-        log.info("Uploaded to Cloudinary. Actual Public ID: {}, Secure URL: {}", actualPublicId, secureUrl);
+//        log.info("Uploaded to Cloudinary. Folder: {}, Actual Public ID: {}, Secure URL: {}", folder, actualPublicId, secureUrl);
 
         return new CloudinaryResponse(actualPublicId, secureUrl);
     }
@@ -77,12 +76,12 @@ public class CloudinaryService {
         }
     }
 
-    public String generatePublicValue(String originalName) {
+    public String generatePublicValue(String originalName, String id, String prefix) {
         String fileName = getFileName(originalName)[0];
         if (fileName.isEmpty()) {
             fileName = "untitled";
         }
-        return UUID.randomUUID().toString() + "_" + fileName;
+        return prefix + "_" + id + "_" + fileName;
     }
 
     public String[] getFileName(String originalName) {
@@ -96,7 +95,7 @@ public class CloudinaryService {
     public void deleteFile(String publicId) {
         try {
             Map result = this.cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("resource_type", "video"));
-            log.info("Cloudinary delete result for publicId {}: {}", publicId, result);
+//            log.info("Cloudinary delete result for publicId {}: {}", publicId, result);
             if (result.get("result") == null || !result.get("result").equals("ok")) {
                 log.warn("Failed to delete file on Cloudinary or file not found. Public ID: {}, Result: {}", publicId, result);
             }
