@@ -1,4 +1,3 @@
-
 package vn.edu.engzone.entity;
 
 import jakarta.persistence.*;
@@ -9,14 +8,12 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import vn.edu.engzone.enums.LessonType;
-import vn.edu.engzone.enums.Level;
+import vn.edu.engzone.enums.CommentType;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
-@Table(name = "lesson")
+@Table(name = "comment")
 @Data
 @Getter
 @Setter
@@ -25,35 +22,27 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EntityListeners(AuditingEntityListener.class)
-public class Lesson {
+public class Comment {
 
     @Id
-    @Column(name = "lesson_id", nullable = false, unique = true, length = 36)
-    String lessonId;
-
-    @Column(nullable = false, length = 100)
-    String title;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "comment_id", nullable = false, unique = true, length = 36)
+    String commentId;
 
     @Lob
-    String description;
-
     @Column(nullable = false)
-    String videoUrl;
+    String content;
 
-    @Column(nullable = false)
-    String videoFileId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    User user;
+
+    @Column(name = "reference_id", nullable = false, length = 36)
+    String referenceId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    Level level;
-
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    LessonType type;
-
-    @Column(nullable = false)
-    boolean isPackageRequired;
+    @Column(name = "reference_type", nullable = false)
+    CommentType commentType;
 
     @CreationTimestamp
     @Column(nullable = false)
@@ -70,13 +59,4 @@ public class Lesson {
     @LastModifiedBy
     @Column(nullable = true, length = 36)
     String updatedBy;
-
-    @ManyToMany
-    @JoinTable(
-            name = "lesson_topic",
-            joinColumns = @JoinColumn(name = "lesson_id"),
-            inverseJoinColumns = @JoinColumn(name = "topic_id")
-    )
-    List<Topic> topics;
-
 }
