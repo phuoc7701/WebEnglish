@@ -10,15 +10,18 @@ import vn.edu.engzone.dto.request.LessonUpdateRequest;
 import vn.edu.engzone.dto.response.CloudinaryResponse;
 import vn.edu.engzone.dto.response.LessonResponse;
 import vn.edu.engzone.entity.Lesson;
+import vn.edu.engzone.enums.CommentType;
 import vn.edu.engzone.enums.LessonType;
 import vn.edu.engzone.enums.Level;
 import vn.edu.engzone.mapper.LessonMapper;
+import vn.edu.engzone.repository.CommentRepository;
 import vn.edu.engzone.repository.LessonRepository;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +32,7 @@ public class LessonService {
     LessonRepository lessonRepository;
     LessonMapper lessonMapper;
     CloudinaryService cloudinaryService;
+    CommentRepository commentRepository;
     AuthenticationService authenticationService;
 
     static String VIDEO_FOLDER = "engzone/lesson/video";
@@ -36,6 +40,9 @@ public class LessonService {
 
     public LessonResponse createLesson(LessonCreateRequest request) throws IOException {
         Lesson lesson = lessonMapper.toLesson(request);
+
+        String lessonId = UUID.randomUUID().toString();
+        lesson.setLessonId(lessonId);
 
         String authenticatedUser = authenticationService.getCurrentAuthenticatedUsername();
         String creator;
@@ -50,9 +57,6 @@ public class LessonService {
         lesson.setCreatedBy(creator);
         initialUpdater = creator;
         lesson.setUpdatedBy(initialUpdater);
-
-        // Save lesson to generate ID
-        lessonRepository.save(lesson);
 
         // Handle video upload using lesson ID
         if (request.getVideoFile() != null && !request.getVideoFile().isEmpty()) {
@@ -153,6 +157,7 @@ public class LessonService {
                     log.error("Could not delete video with publicId: {}. Continuing with lesson deletion.", videoFileId, e);
                 }
             }
+            commentRepository.deleteByReferenceIdAndCommentType(id, CommentType.LESSON);
             lessonRepository.deleteById(id);
         } else {
             throw new RuntimeException("Lesson not found");

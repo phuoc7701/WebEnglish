@@ -1,15 +1,15 @@
-package vn.edu.engzone.dto.response;
+package vn.edu.engzone.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CloudinaryResponse {
-    String publicId;
-    String secureUrl;
-}
+public class CommentUpdateRequest {
 
+    String content;
+}
