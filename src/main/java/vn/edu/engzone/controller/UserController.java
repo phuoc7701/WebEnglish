@@ -1,8 +1,11 @@
 package vn.edu.engzone.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import vn.edu.engzone.dto.request.ApiResponse;
 import vn.edu.engzone.dto.request.UserCreationRequest;
+import vn.edu.engzone.dto.request.UserProfileRequest;
 import vn.edu.engzone.dto.request.UserUpdateRequest;
+import vn.edu.engzone.dto.response.UserProfileResponse;
 import vn.edu.engzone.dto.response.UserResponse;
 import vn.edu.engzone.service.UserService;
 
@@ -21,8 +24,9 @@ import java.util.List;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
+
 public class UserController {
-    private static final Logger log = LoggerFactory.getLogger(UserController.class);
     UserService userService;
 
     //api tạo thông tin user
@@ -64,18 +68,19 @@ public class UserController {
     }
 
     //api update thông tin
-    @PutMapping("/{userId}")
-    ApiResponse<UserResponse> updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
-        return ApiResponse.<UserResponse>builder()
-                .result(userService.updateUser(userId, request))
+    @GetMapping("/{userId}/profile")
+    ApiResponse<UserProfileResponse> getProfile(@PathVariable String userId) {
+        return ApiResponse.<UserProfileResponse>builder()
+                .result(userService.getProfile(userId))
                 .build();
     }
 
-    //api delete thông tin
-    @DeleteMapping("/{userId}")
-    ApiResponse<String> deleteUser(@PathVariable String userId) {
-        userService.deleteUser(userId);
-        return ApiResponse.<String>builder().result("User has been deleted").build();
+    @PutMapping("/{userId}/profile")
+    ApiResponse<UserProfileResponse> updateProfile(@PathVariable String userId,
+                                                   @RequestBody @Valid UserProfileRequest request) {
+        return ApiResponse.<UserProfileResponse>builder()
+                .result(userService.updateProfile(userId, request))
+                .build();
     }
 
 }

@@ -19,11 +19,16 @@ public class User {
     @Id //định nghĩa cho id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
+
     String username;
     String password;
     String email;
     String fullname;
     LocalDate dob;
+    String avatarUrl;
+    String gender;
+    LocalDate premiumExpiry;
+
 
     @ManyToMany
     Set<Role> roles;

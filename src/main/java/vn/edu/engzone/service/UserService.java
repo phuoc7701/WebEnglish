@@ -1,7 +1,9 @@
 package vn.edu.engzone.service;
 
 import vn.edu.engzone.dto.request.UserCreationRequest;
+import vn.edu.engzone.dto.request.UserProfileRequest;
 import vn.edu.engzone.dto.request.UserUpdateRequest;
+import vn.edu.engzone.dto.response.UserProfileResponse;
 import vn.edu.engzone.dto.response.UserResponse;
 import vn.edu.engzone.entity.User;
 import vn.edu.engzone.enums.Role;
@@ -94,7 +96,7 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-@PreAuthorize("hasRole('ADMIN')") //kiểm tra trước khi vào method
+    @PreAuthorize("hasRole('ADMIN')") //kiểm tra trước khi vào method
 //@PreAuthorize("hasAuthority('APPROVE_POST')")
     public List<UserResponse> getUsers(){
         log.info("In method get Users");
@@ -108,4 +110,23 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found")));
     }
+
+    public UserProfileResponse getProfile(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return userMapper.toUserProfileResponse(user);
+    }
+
+    public UserProfileResponse updateProfile(String userId, UserProfileRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        user.setFullname(request.getFullname());
+        user.setDob(request.getDob());
+        user.setAvatarUrl(request.getAvatarUrl());
+        user.setGender(request.getGender());
+
+        return userMapper.toUserProfileResponse(userRepository.save(user));
+    }
+
 }
