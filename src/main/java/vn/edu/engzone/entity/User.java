@@ -24,8 +24,8 @@ public class User {
     String email;
     String fullname;
     LocalDate dob;
-    @Column(columnDefinition = "INT DEFAULT 1")
-    Integer accountStatus = 1 ;
+
+    Integer accountStatus;
 
     @ManyToMany
     Set<Role> roles;
