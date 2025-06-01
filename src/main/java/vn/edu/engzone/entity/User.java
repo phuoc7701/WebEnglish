@@ -25,10 +25,11 @@ public class User {
     String email;
     String fullname;
     LocalDate dob;
+    @Column(columnDefinition = "INT DEFAULT 1")
+    Integer accountStatus = 1 ;
     String avatarUrl;
     String gender;
     LocalDate premiumExpiry;
-
 
     @ManyToMany
     Set<Role> roles;
