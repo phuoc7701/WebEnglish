@@ -2,6 +2,7 @@ package vn.edu.engzone.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import vn.edu.engzone.enums.CommentType;
 
 import java.time.LocalDateTime;
 
@@ -10,14 +11,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LessonResponse {
-    String lessonId;
-    String title;
-    String description;
-    String videoUrl;
-    String level;
-    String type;
-    boolean isPackageRequired;
+public class CommentResponse {
+
+    String commentId;
+    String content;
+    String userId;
+    String username;
+    String referenceId;
+    CommentType commentType;
     LocalDateTime createdAt;
     String createdBy;
     LocalDateTime updatedAt;

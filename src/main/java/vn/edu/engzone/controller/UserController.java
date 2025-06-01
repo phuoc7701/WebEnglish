@@ -1,10 +1,7 @@
 package vn.edu.engzone.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import vn.edu.engzone.dto.request.ApiResponse;
-import vn.edu.engzone.dto.request.UserCreationRequest;
-import vn.edu.engzone.dto.request.UserProfileRequest;
-import vn.edu.engzone.dto.request.UserUpdateRequest;
+import vn.edu.engzone.dto.request.*;
 import vn.edu.engzone.dto.response.UserProfileResponse;
 import vn.edu.engzone.dto.response.UserResponse;
 import vn.edu.engzone.service.UserService;
@@ -80,6 +77,13 @@ public class UserController {
                                                    @RequestBody @Valid UserProfileRequest request) {
         return ApiResponse.<UserProfileResponse>builder()
                 .result(userService.updateProfile(userId, request))
+                .build();
+    }
+
+    @PostMapping("/change-password")
+    ApiResponse<String> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
+        return ApiResponse.<String>builder()
+                .result(userService.changePassword(request))
                 .build();
     }
 

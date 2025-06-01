@@ -18,7 +18,6 @@ import java.util.Set;
 public class User {
     @Id //định nghĩa cho id
     @GeneratedValue(strategy = GenerationType.UUID)
-
     String id;
 
     String username;

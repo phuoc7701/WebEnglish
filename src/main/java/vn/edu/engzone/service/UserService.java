@@ -1,5 +1,6 @@
 package vn.edu.engzone.service;
 
+import vn.edu.engzone.dto.request.ChangePasswordRequest;
 import vn.edu.engzone.dto.request.UserCreationRequest;
 import vn.edu.engzone.dto.request.UserProfileRequest;
 import vn.edu.engzone.dto.request.UserUpdateRequest;
@@ -127,6 +128,23 @@ public class UserService {
         user.setGender(request.getGender());
 
         return userMapper.toUserProfileResponse(userRepository.save(user));
+    }
+
+    public String changePassword(ChangePasswordRequest request) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.INVALID_PASS); // cần define ErrorCode này nếu chưa có
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        return "Đổi mật khẩu thành công";
     }
 
 }

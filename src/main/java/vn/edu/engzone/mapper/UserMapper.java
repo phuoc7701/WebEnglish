@@ -22,4 +22,5 @@ public interface UserMapper {
     UserProfileResponse toUserProfileResponse(User user);
 
     void updateUserProfile(@MappingTarget User user, UserProfileRequest request);
+
 }
