@@ -2,6 +2,7 @@ package vn.edu.engzone.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import vn.edu.engzone.dto.request.CommentCreateRequest;
 import vn.edu.engzone.dto.request.CommentUpdateRequest;
@@ -45,7 +46,10 @@ public class CommentService {
     }
 
     public List<CommentResponse> getCommentsByReference(String referenceId, CommentType commentType) {
-        List<Comment> comments = commentRepository.findByReferenceIdAndCommentType(referenceId, commentType);
+        List<Comment> comments = commentRepository.findByReferenceIdAndCommentType(
+                referenceId,
+                commentType,
+                Sort.by(Sort.Direction.DESC, "createdAt"));
         return comments.stream()
                 .map(commentMapper::toCommentResponse)
                 .toList();

@@ -1,5 +1,6 @@
 package vn.edu.engzone.repository;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import vn.edu.engzone.entity.Comment;
@@ -14,7 +15,8 @@ public interface CommentRepository extends JpaRepository<Comment, String> {
     Optional<Comment> findById(String commentId);
 
     @EntityGraph(attributePaths = {"user"})
-    List<Comment> findByReferenceIdAndCommentType(String referenceId, CommentType commentType);
+    List<Comment> findByReferenceIdAndCommentType(String referenceId, CommentType commentType, Sort createdAt);
 
     void deleteByReferenceIdAndCommentType(String referenceId, CommentType commentType);
+
 }
