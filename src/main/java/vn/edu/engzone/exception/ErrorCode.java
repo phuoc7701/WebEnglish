@@ -16,7 +16,7 @@ public enum ErrorCode {
     UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
-    INVALID_TOKEN(1009, "Invalid password reset token", HttpStatus.BAD_REQUEST),
+    INVALID_PASS(1009, "Mật khẩu cũ không đúng !", HttpStatus.BAD_REQUEST),
     TOKEN_EXPIRED(1010, "Password reset token expired", HttpStatus.BAD_REQUEST)
     ;
 
