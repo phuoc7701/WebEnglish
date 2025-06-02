@@ -1,5 +1,6 @@
 package vn.edu.engzone.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
@@ -21,6 +22,7 @@ public class Question {
 
     private String correctAnswer;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "part_id")
     private TestPart part;

@@ -1,6 +1,8 @@
 package vn.edu.engzone.service;
 
 
+import vn.edu.engzone.dto.request.QuestionRequest;
+import vn.edu.engzone.dto.request.TestPartRequest;
 import vn.edu.engzone.dto.request.TestRequest;
 import vn.edu.engzone.dto.response.QuestionResponse;
 import vn.edu.engzone.dto.response.TestPartResponse;
@@ -11,8 +13,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,44 +64,70 @@ public class TestService {
 
     @Transactional
     public TestResponse updateTest(String id, TestRequest request) {
-        Optional<Test> opt = testRepository.findById(id);
-        if (opt.isEmpty()) return null;
-        Test test = opt.get();
+        Test test = testRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Test not found"));
 
-        // Update fields
         test.setTitle(request.getTitle());
         test.setDescription(request.getDescription());
         test.setDuration(request.getDuration());
 
+        // Map existing parts by id
+        Map<String, TestPart> existingParts = test.getParts().stream()
+                .collect(Collectors.toMap(p -> p.getId().toString(), p -> p));
 
-        // Remove old parts (cascades to questions)
+        List<TestPart> updatedParts = new ArrayList<>();
+        for (TestPartRequest pr : request.getParts()) {
+            TestPart part;
+            if (pr.getId() != null && existingParts.containsKey(pr.getId())) {
+                part = existingParts.remove(pr.getId());
+                part.setPartNumber(pr.getPartNumber());
+                part.setPartTitle(pr.getPartTitle());
+            } else {
+                part = new TestPart();
+                part.setTest(test);
+                part.setPartNumber(pr.getPartNumber());
+                part.setPartTitle(pr.getPartTitle());
+            }
+
+            // Handle questions
+            Map<String, Question> existingQuestions = part.getQuestions() == null ? new HashMap<>()
+                    : part.getQuestions().stream()
+                    .filter(q -> q.getId() != null)
+                    .collect(Collectors.toMap(q -> q.getId().toString(), q -> q));
+            List<Question> updatedQuestions = new ArrayList<>();
+            for (QuestionRequest qr : pr.getQuestions()) {
+                Question q;
+                if (qr.getId() != null && existingQuestions.containsKey(qr.getId())) {
+                    q = existingQuestions.remove(qr.getId());
+                    q.setQuestion(qr.getQuestion());
+                    q.setOptions(qr.getOptions());
+                    q.setCorrectAnswer(qr.getCorrectAnswer());
+                } else {
+                    q = new Question();
+                    q.setPart(part);
+                    q.setQuestion(qr.getQuestion());
+                    q.setOptions(qr.getOptions());
+                    q.setCorrectAnswer(qr.getCorrectAnswer());
+                }
+                updatedQuestions.add(q);
+            }
+            if (part.getQuestions() != null) {
+                part.getQuestions().removeAll(existingQuestions.values());
+            }
+            if (part.getQuestions() == null) {
+                part.setQuestions(new ArrayList<>());
+            }
+            part.getQuestions().clear();
+            part.getQuestions().addAll(updatedQuestions);
+            updatedParts.add(part);
+        }
+        test.getParts().removeAll(existingParts.values());
         test.getParts().clear();
+        test.getParts().addAll(updatedParts);
 
-        // Add new parts
-        List<TestPart> newParts = request.getParts().stream().map(pr -> {
-            TestPart part = new TestPart();
-            part.setPartNumber(pr.getPartNumber());
-            part.setPartTitle(pr.getPartTitle());
-            part.setTest(test);
-
-            List<Question> questions = pr.getQuestions().stream().map(qr -> {
-                Question q = new Question();
-                q.setQuestion(qr.getQuestion());
-                q.setOptions(qr.getOptions());
-                q.setCorrectAnswer(qr.getCorrectAnswer());
-                q.setPart(part);
-                return q;
-            }).collect(Collectors.toList());
-
-            part.setQuestions(questions);
-            return part;
-        }).collect(Collectors.toList());
-
-        test.setParts(newParts);
-        Test savedTest = testRepository.save(test);
-        return toTestResponse(savedTest);
+        testRepository.save(test);
+        return toTestResponse(test);
     }
-
     @Transactional
     public boolean deleteTest(String id) {
         Optional<Test> opt = testRepository.findById(id);

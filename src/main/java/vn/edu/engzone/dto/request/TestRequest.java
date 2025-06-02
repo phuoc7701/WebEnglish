@@ -7,6 +7,6 @@ import java.util.List;
 public class TestRequest {
     private String title;
     private String description;
-    private String duration;
+    private int duration;
     private List<TestPartRequest> parts;
 }
