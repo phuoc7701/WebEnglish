@@ -1,5 +1,7 @@
 package vn.edu.engzone.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
@@ -17,6 +19,7 @@ public class TestPart {
     private int partNumber;
     private String partTitle;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "test_id")
     private Test test;

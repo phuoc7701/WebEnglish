@@ -34,12 +34,14 @@ public class TestController {
 
     @PostMapping
     public ResponseEntity<TestResponse> create(@RequestBody TestRequest request) {
+        System.out.println("Dữ liệu nhận được từ FE: " + request);
         TestResponse created = testService.createTest(request);
         return ResponseEntity.ok(created);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TestResponse> update(@PathVariable String id, @RequestBody TestRequest request) {
+
         TestResponse updated = testService.updateTest(id, request);
         if (updated == null) {
             return ResponseEntity.notFound().build();

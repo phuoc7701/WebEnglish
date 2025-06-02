@@ -1,5 +1,6 @@
 package vn.edu.engzone.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -13,7 +14,7 @@ public class Test {
     private String id;
     private String title;
     private String description;
-    private String duration;
+    private int duration;
 
     // private Course course;
 
