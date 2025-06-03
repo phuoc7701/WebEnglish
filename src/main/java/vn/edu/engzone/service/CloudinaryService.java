@@ -28,19 +28,15 @@ public class CloudinaryService {
     public CloudinaryResponse uploadFile(MultipartFile file, String folder, String id, String prefix) throws IOException {
         assert file.getOriginalFilename() != null;
         String publicValue = generatePublicValue(file.getOriginalFilename(), id, prefix);
-//        log.info("Public Value: {}", publicValue);
 
         File fileUploaded = convertToTempFile(file);
-//        log.info("File uploaded path: {}", fileUploaded.getAbsolutePath());
 
-        // Upload video to specified folder
+        // Thêm upload_preset vào tham số
         Map uploadResultMap = cloudinary.uploader().upload(fileUploaded, ObjectUtils.asMap(
                 "public_id", publicValue,
                 "folder", folder,
                 "resource_type", "auto"
         ));
-
-//        log.info("Cloudinary upload result: {}", uploadResultMap);
 
         cleanDisk(fileUploaded);
 
@@ -51,8 +47,6 @@ public class CloudinaryService {
             log.error("Cloudinary upload failed to return public_id or secure_url. Result: {}", uploadResultMap);
             throw new IOException("Cloudinary upload failed, missing public_id or secure_url in response.");
         }
-
-//        log.info("Uploaded to Cloudinary. Folder: {}, Actual Public ID: {}, Secure URL: {}", folder, actualPublicId, secureUrl);
 
         return new CloudinaryResponse(actualPublicId, secureUrl);
     }

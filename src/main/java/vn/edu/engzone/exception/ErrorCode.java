@@ -17,7 +17,7 @@ public enum ErrorCode {
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
     INVALID_PASS(1009, "Mật khẩu cũ không đúng !", HttpStatus.BAD_REQUEST),
-    TOKEN_EXPIRED(1010, "Password reset token expired", HttpStatus.BAD_REQUEST)
+    INVALID_REQUEST(1010, "Invalid request", HttpStatus.BAD_REQUEST)
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

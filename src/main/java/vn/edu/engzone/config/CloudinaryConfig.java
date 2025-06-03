@@ -22,11 +22,20 @@ public class CloudinaryConfig {
         this.cloudApiKey = dotenv.get("CLOUD_API_KEY");
         this.cloudApiSecret = dotenv.get("CLOUD_API_SECRET");
         this.cloudUploadPreset = dotenv.get("CLOUD_UPLOAD_PRESET");
+
+        if (cloudName == null || cloudApiKey == null || cloudApiSecret == null || cloudUploadPreset == null) {
+            throw new IllegalStateException("Missing Cloudinary configuration in .env file");
+        }
+        // Thêm log để kiểm tra
+        System.out.println("Cloudinary Config - cloudName: " + cloudName);
+        System.out.println("Cloudinary Config - cloudApiKey: " + cloudApiKey);
+        System.out.println("Cloudinary Config - cloudApiSecret: " + cloudApiSecret);
+        System.out.println("Cloudinary Config - cloudUploadPreset: " + cloudUploadPreset);
     }
 
     @Bean
     public Cloudinary cloudinary() {
-        Map<String, String> config = new HashMap();
+        Map<String, String> config = new HashMap<>();
         config.put("cloud_name", cloudName);
         config.put("api_key", cloudApiKey);
         config.put("api_secret", cloudApiSecret);

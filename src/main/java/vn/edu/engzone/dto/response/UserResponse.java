@@ -16,6 +16,7 @@ public class UserResponse {
     String username;
     String email;
     String fullname;
+    String avatarUrl;
     LocalDate dob;
     Integer accountStatus;
     Set<RoleResponse> roles;

@@ -1,9 +1,12 @@
 package vn.edu.engzone.service;
 
+import jakarta.mail.MessagingException;
+import org.springframework.web.multipart.MultipartFile;
 import vn.edu.engzone.dto.request.ChangePasswordRequest;
 import vn.edu.engzone.dto.request.UserCreationRequest;
 import vn.edu.engzone.dto.request.UserProfileRequest;
 import vn.edu.engzone.dto.request.UserUpdateRequest;
+import vn.edu.engzone.dto.response.CloudinaryResponse;
 import vn.edu.engzone.dto.response.UserProfileResponse;
 import vn.edu.engzone.dto.response.UserResponse;
 import vn.edu.engzone.entity.User;
@@ -24,6 +27,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.List;
 
@@ -37,6 +42,13 @@ public class UserService {
     UserMapper userMapper;
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
+    CloudinaryService cloudinaryService;
+    EmailService emailService;
+
+    static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    static final int LENGTH = 8;
+    static final SecureRandom random = new SecureRandom();
+
 
     public UserResponse createUser(UserCreationRequest request){
         if (userRepository.existsByUsername(request.getUsername()))
@@ -51,6 +63,15 @@ public class UserService {
         roleRepository.findById(Role.USER.name()).ifPresent(roles::add);
 
         user.setRoles(roles);
+
+        try {
+            emailService.sendEmail(request.getEmail(), "Đăng ký thành công", "Welcome to EngZone!");
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+
+            // Nếu gmail không tồn tại
+
+        }
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
@@ -93,6 +114,7 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(String userId) {
         userRepository.deleteById(userId);
     }
@@ -146,5 +168,75 @@ public class UserService {
 
         return "Đổi mật khẩu thành công";
     }
+
+    public String forgotPassword(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        String newPassword = generateRandomString();
+        try {
+            emailService.sendEmail(user.getEmail(), "Cập nhật mật khẩu mới", "New password: " + newPassword);
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+        } catch (MessagingException e) {
+            return "Cập nhật mật khẩu mới thất bại";
+        }
+        return "Cập nhật mật khẩu mới thành công";
+    }
+
+    private String generateRandomString() {
+        StringBuilder sb = new StringBuilder(LENGTH);
+        for (int i = 0; i < LENGTH; i++) {
+            int index = random.nextInt(CHARACTERS.length());
+            sb.append(CHARACTERS.charAt(index));
+        }
+        return sb.toString();
+    }
+
+    public UserResponse uploadAvatar(MultipartFile avatarFile) throws IOException {
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            String oldAvatarFileId = user.getAvatarFileId();
+            if (oldAvatarFileId != null && !oldAvatarFileId.isBlank()) {
+                try {
+                    cloudinaryService.deleteFile(oldAvatarFileId);
+                    log.info("Deleted old avatar with publicId: {}", oldAvatarFileId);
+                } catch (Exception e) {
+                    log.error("Failed to delete old avatar: {}", oldAvatarFileId, e);
+                }
+            }
+
+            CloudinaryResponse uploadResult = cloudinaryService.uploadFile(
+                    avatarFile,
+                    "engzone/user/avatar",
+                    user.getId(),
+                    "avatar"
+            );
+
+            user.setAvatarUrl(uploadResult.getSecureUrl());
+            user.setAvatarFileId(uploadResult.getPublicId());
+        } else {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        return userMapper.toUserResponse(userRepository.save(user));
+    }
+
+    public String getCurrentUserAvatarUrl() {
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        return user.getAvatarUrl();
+    }
+
+
 
 }

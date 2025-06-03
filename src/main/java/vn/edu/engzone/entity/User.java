@@ -26,6 +26,7 @@ public class User {
     String fullname;
     LocalDate dob;
     String avatarUrl;
+    String avatarFileId;
     String gender;
     LocalDate premiumExpiry;
 
