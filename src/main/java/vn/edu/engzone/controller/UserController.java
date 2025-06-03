@@ -1,7 +1,9 @@
 package vn.edu.engzone.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 import vn.edu.engzone.dto.request.*;
+import vn.edu.engzone.dto.response.CloudinaryResponse;
 import vn.edu.engzone.dto.response.UserProfileResponse;
 import vn.edu.engzone.dto.response.UserResponse;
 import vn.edu.engzone.service.UserService;
@@ -15,7 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -57,6 +62,12 @@ public class UserController {
                 .build();
     }
 
+    @DeleteMapping("/{userId}")
+    ApiResponse<String> deleteUser(@PathVariable String userId) {
+        userService.deleteUser(userId);
+        return ApiResponse.<String>builder().result("User has been deleted").build();
+    }
+
     @GetMapping("/myInfo")
     ApiResponse<UserResponse> getMyInfo() {
         return ApiResponse.<UserResponse>builder()
@@ -80,10 +91,34 @@ public class UserController {
                 .build();
     }
 
-    @PostMapping("/change-password")
+    @PutMapping("/change-password")
     ApiResponse<String> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
         return ApiResponse.<String>builder()
                 .result(userService.changePassword(request))
+                .build();
+    }
+
+    @PutMapping("/forgot-password/{email}")
+    ApiResponse<String> forgotPassword(@PathVariable String email) {
+        return ApiResponse.<String>builder()
+                .result(userService.forgotPassword(email))
+                .build();
+    }
+
+    @GetMapping("/avatar")
+    public ApiResponse<Map<String, String>> getCurrentUserAvatar() {
+        String avatarUrl = userService.getCurrentUserAvatarUrl();
+        Map<String, String> result = new HashMap<>();
+        result.put("avatarUrl", avatarUrl);
+        return ApiResponse.<Map<String, String>>builder()
+                .result(result)
+                .build();
+    }
+
+    @PostMapping("/upload-avatar")
+    ApiResponse<UserResponse> uploadAvatar(@RequestParam("avatarFile") MultipartFile avatarFile) throws IOException {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.uploadAvatar(avatarFile))
                 .build();
     }
 

@@ -28,6 +28,7 @@ public class User {
     @Column(columnDefinition = "INT DEFAULT 1")
     Integer accountStatus = 1 ;
     String avatarUrl;
+    String avatarFileId;
     String gender;
     LocalDate premiumExpiry;
 

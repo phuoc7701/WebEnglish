@@ -12,3 +12,4 @@ public class CloudinaryResponse {
     String publicId;
     String secureUrl;
 }
+

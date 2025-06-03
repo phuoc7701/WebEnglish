@@ -4,10 +4,12 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@FieldDefaults(level = AccessLevel.PRIVATE)@Getter
-public class ForgotPasswordRequest {
-    String email;
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class EmailRequest {
+    String to;
+    String subject;
+    String body;
 }
