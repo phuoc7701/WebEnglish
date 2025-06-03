@@ -25,9 +25,9 @@ public class WritingAIController {
     public ResponseEntity<String> generateEssayTopicAI(String topicInput) {
         String topic;
         if (topicInput == null || topicInput.isEmpty()) {
-            topic = writingAIService.generateEssayTopicAI().replaceAll("\\s+", "");
+            topic = writingAIService.generateEssayTopicAI();
         } else {
-            topic = topicInput.replaceAll("\\s+", "");
+            topic = topicInput;
         }
         return ResponseEntity.ok(topic);
     }

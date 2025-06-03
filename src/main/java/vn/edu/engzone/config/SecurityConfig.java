@@ -28,7 +28,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
-            "/users", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh", "/admin/**",
+            "/users", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh", "/admin/**","/engzone/tests/submit","/engzone/speaking/evaluate"
     };
 
     @Autowired
@@ -82,4 +82,6 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+
 }
