@@ -28,7 +28,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
-            "/users", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh", "/admin/**","/engzone/tests/submit"
+            "/users", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh", "/admin/**","/engzone/tests/submit","/engzone/speaking/evaluate"
     };
 
     @Autowired
