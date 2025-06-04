@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import vn.edu.engzone.dto.request.LessonCreateRequest;
 import vn.edu.engzone.dto.request.LessonUpdateRequest;
@@ -112,7 +113,7 @@ public class LessonService {
     }
 
     public List<LessonResponse> getAllLessons() {
-        return lessonRepository.findAll().stream()
+        return lessonRepository.findAll(Sort.by(Sort.Direction.DESC, "updatedAt")).stream()
                 .map(lessonMapper::toLessonResponse)
                 .collect(Collectors.toList());
     }

@@ -26,6 +26,11 @@ public class CloudinaryService {
     Cloudinary cloudinary;
 
     public CloudinaryResponse uploadFile(MultipartFile file, String folder, String id, String prefix) throws IOException {
+        long maxSize = 100 * 1024 * 1024; // 100MB
+        if (file.getSize() > maxSize) {
+            throw new IllegalArgumentException("Tệp quá lớn. Kích thước tối đa là 100MB.");
+        }
+
         assert file.getOriginalFilename() != null;
         String publicValue = generatePublicValue(file.getOriginalFilename(), id, prefix);
 
