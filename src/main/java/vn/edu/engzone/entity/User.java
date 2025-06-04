@@ -22,6 +22,7 @@ public class User {
 
     String username;
     String password;
+    @Column(unique = true)
     String email;
     String fullname;
     LocalDate dob;
