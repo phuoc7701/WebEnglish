@@ -9,6 +9,7 @@ import vn.edu.engzone.dto.request.LessonCreateRequest;
 import vn.edu.engzone.dto.request.LessonUpdateRequest;
 import vn.edu.engzone.dto.response.CloudinaryResponse;
 import vn.edu.engzone.dto.response.LessonResponse;
+import vn.edu.engzone.dto.response.QuizQuestionResponse;
 import vn.edu.engzone.entity.Lesson;
 import vn.edu.engzone.entity.QuizQuestion;
 import vn.edu.engzone.enums.CommentType;
@@ -39,6 +40,18 @@ public class LessonService {
 
     // ...existing code...
     public LessonResponse createLesson(LessonCreateRequest request) throws IOException {
+
+        if (request.getQuestions() == null || request.getQuestions().isEmpty()) {
+            throw new IllegalArgumentException("Phải thêm ít nhất 1 câu hỏi cho bài học.");
+        }
+        for (var q : request.getQuestions()) {
+            if (q.getOptions() == null || q.getOptions().size() != 4) {
+                throw new IllegalArgumentException("Mỗi câu hỏi phải có đúng 4 đáp án.");
+            }
+            if (q.getCorrectAnswer() == null || q.getCorrectAnswer() < 0 || q.getCorrectAnswer() >= q.getOptions().size()) {
+                throw new IllegalArgumentException("Phải chọn đáp án đúng cho mỗi câu hỏi.");
+            }
+        }
         Lesson lesson = lessonMapper.toLesson(request);
 
         String lessonId = UUID.randomUUID().toString();
@@ -104,7 +117,34 @@ public class LessonService {
                 .collect(Collectors.toList());
     }
 
+    public List<QuizQuestionResponse> getQuizQuestionsByLessonId(String lessonId) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new RuntimeException("Lesson not found"));
+        return lesson.getQuestions().stream()
+                .map(q -> QuizQuestionResponse.builder()
+                        .id(q.getId())
+                        .question(q.getQuestion())
+                        .options(q.getOptions())
+                        .correctAnswer(q.getCorrectAnswer())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     public LessonResponse updateLesson(String id, LessonUpdateRequest request) throws IOException {
+
+        if (request.getQuestions() == null || request.getQuestions().isEmpty()) {
+            throw new IllegalArgumentException("Phải thêm ít nhất 1 câu hỏi cho bài học.");
+        }
+        for (var q : request.getQuestions()) {
+
+            if (q.getOptions() == null || q.getOptions().size() != 4) {
+                throw new IllegalArgumentException("Mỗi câu hỏi phải có đúng 4 đáp án.");
+            }
+            if (q.getCorrectAnswer() == null || q.getCorrectAnswer() < 0 || q.getCorrectAnswer() >= q.getOptions().size()) {
+                throw new IllegalArgumentException("Phải chọn đáp án đúng cho mỗi câu hỏi.");
+            }
+        }
+
         Lesson lesson = lessonRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Lesson not found"));
 
