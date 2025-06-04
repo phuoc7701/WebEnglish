@@ -63,19 +63,19 @@ public class GlobalExceptionHandler {
 
             log.info(attributes.toString());
 
+            ApiResponse apiResponse = new ApiResponse();
+
+            apiResponse.setCode(errorCode.getCode());
+            apiResponse.setMessage(Objects.nonNull(attributes) ?
+                    mapAttribute(errorCode.getMessage(), attributes)
+                    : errorCode.getMessage());
+
         }catch (IllegalArgumentException e) {
 
         }
-
-
         ApiResponse apiResponse = new ApiResponse();
-
-        apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(Objects.nonNull(attributes) ?
-                mapAttribute(errorCode.getMessage(), attributes)
-                : errorCode.getMessage());
-
-
+        apiResponse.setCode(ErrorCode.INVALID_KEY.getCode());
+        apiResponse.setMessage(enumKey); // enumKey lúc này là message gốc, ví dụ: "Email không đúng định dạng"
         return ResponseEntity.badRequest().body(apiResponse);
     }
 

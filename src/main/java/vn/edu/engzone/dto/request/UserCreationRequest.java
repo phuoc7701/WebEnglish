@@ -1,5 +1,6 @@
 package vn.edu.engzone.dto.request;
 
+import jakarta.validation.constraints.Email;
 import vn.edu.engzone.validator.DobConstraint;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -18,6 +19,7 @@ public class UserCreationRequest {
 
     @Size(min = 8, message = "INVALID_PASSWORD") //validate cho password
     String password;
+    @Email(message = "Email không đúng định dạng")
     String email;
     String fullname;
     Integer status = 1;

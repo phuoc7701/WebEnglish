@@ -1,5 +1,6 @@
 package vn.edu.engzone.service;
 
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -212,6 +213,7 @@ public class LessonService {
         return lessonMapper.toLessonResponse(lesson);
     }
 
+    @Transactional
     public void deleteLesson(String id) {
         Optional<Lesson> lessonOpt = lessonRepository.findById(id);
         if (lessonOpt.isPresent()) {
