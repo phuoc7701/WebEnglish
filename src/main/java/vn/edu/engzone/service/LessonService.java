@@ -10,6 +10,7 @@ import vn.edu.engzone.dto.request.LessonUpdateRequest;
 import vn.edu.engzone.dto.response.CloudinaryResponse;
 import vn.edu.engzone.dto.response.LessonResponse;
 import vn.edu.engzone.entity.Lesson;
+import vn.edu.engzone.entity.QuizQuestion;
 import vn.edu.engzone.enums.CommentType;
 import vn.edu.engzone.enums.LessonType;
 import vn.edu.engzone.enums.Level;
@@ -19,9 +20,7 @@ import vn.edu.engzone.repository.LessonRepository;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +37,7 @@ public class LessonService {
     static String VIDEO_FOLDER = "engzone/lesson/video";
     static String LESSON_VIDEO_PREFIX = "lesson_video";
 
+    // ...existing code...
     public LessonResponse createLesson(LessonCreateRequest request) throws IOException {
         Lesson lesson = lessonMapper.toLesson(request);
 
@@ -45,18 +45,22 @@ public class LessonService {
         lesson.setLessonId(lessonId);
 
         String authenticatedUser = authenticationService.getCurrentAuthenticatedUsername();
-        String creator;
-        String initialUpdater;
-
-        if (authenticatedUser != null) {
-            creator = authenticatedUser;
-        } else {
-            log.warn("The creator of the lesson is unknown. Set the default value to 'unknown_user'.");
-            creator = "unknown_user";
-        }
+        String creator = authenticatedUser != null ? authenticatedUser : "unknown_user";
         lesson.setCreatedBy(creator);
-        initialUpdater = creator;
-        lesson.setUpdatedBy(initialUpdater);
+        lesson.setUpdatedBy(creator);
+
+        // Xử lý câu hỏi trước khi lưu lesson
+        if (request.getQuestions() != null) {
+            List<QuizQuestion> quizQuestions = request.getQuestions().stream()
+                    .map(q -> QuizQuestion.builder()
+                            .question(q.getQuestion())
+                            .options(q.getOptions())
+                            .correctAnswer(q.getCorrectAnswer())
+                            .lesson(lesson)
+                            .build())
+                    .collect(Collectors.toList());
+            lesson.setQuestions(quizQuestions);
+        }
 
         // Handle video upload using lesson ID
         if (request.getVideoFile() != null && !request.getVideoFile().isEmpty()) {
@@ -71,13 +75,16 @@ public class LessonService {
             lesson.setVideoFileId(uploadDetails.getPublicId());
 
             lessonRepository.save(lesson);
+
+            // Lấy lại lesson từ DB để đảm bảo các câu hỏi đã có id
+            Lesson savedLesson = lessonRepository.findById(lesson.getLessonId())
+                    .orElseThrow(() -> new RuntimeException("Lesson not found after save"));
+            return lessonMapper.toLessonResponse(savedLesson);
         } else {
-            lessonRepository.delete(lesson); // Rollback if no video
             throw new IllegalArgumentException("Must provide videoFile");
         }
-
-        return lessonMapper.toLessonResponse(lesson);
     }
+// ...existing code...
 
     public LessonResponse getLessonById(String id) {
         Lesson lesson = lessonRepository.findById(id)
@@ -101,7 +108,27 @@ public class LessonService {
         Lesson lesson = lessonRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Lesson not found"));
 
+        if (lesson.getQuestions() != null) {
+            Iterator<QuizQuestion> iterator = lesson.getQuestions().iterator();
+            while (iterator.hasNext()) {
+                iterator.next();
+                iterator.remove();
+            }
+        }
+        
         lessonMapper.updateLesson(lesson, request);
+
+        if (request.getQuestions() != null) {
+            List<QuizQuestion> quizQuestions = request.getQuestions().stream()
+                    .map(q -> QuizQuestion.builder()
+                            .question(q.getQuestion())
+                            .options(q.getOptions())
+                            .correctAnswer(q.getCorrectAnswer())
+                            .lesson(lesson)
+                            .build())
+                    .collect(Collectors.toList());
+            lesson.getQuestions().addAll(quizQuestions);
+        }
 
         // Handle Video: upload file or use URL
         if (request.getVideoFile() != null && !request.getVideoFile().isEmpty()) {

@@ -1,3 +1,4 @@
+
 package vn.edu.engzone.controller;
 
 import lombok.AccessLevel;
@@ -7,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.engzone.dto.response.LessonResponse;
+import vn.edu.engzone.dto.response.QuizQuestionResponse;
+import vn.edu.engzone.entity.QuizQuestion;
 import vn.edu.engzone.enums.LessonType;
 import vn.edu.engzone.enums.Level;
 import vn.edu.engzone.service.LessonService;
@@ -45,4 +48,9 @@ public class LessonController {
         }
     }
 
+    @GetMapping("/{id}/questions")
+    public ResponseEntity<List<QuizQuestionResponse>> getLessonQuestions(@PathVariable String id) {
+        LessonResponse lesson = lessonService.getLessonById(id);
+        return ResponseEntity.ok(lesson.getQuestions());
+    }
 }
