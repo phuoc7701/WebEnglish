@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -22,5 +23,5 @@ public class LessonResponse {
     String createdBy;
     LocalDateTime updatedAt;
     String updatedBy;
-    
+    List<QuizQuestionResponse> questions;
 }

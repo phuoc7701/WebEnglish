@@ -79,4 +79,7 @@ public class Lesson {
 //    )
 //    List<Topic> topics;
 
+    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<QuizQuestion> questions;
+
 }
