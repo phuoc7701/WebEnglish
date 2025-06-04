@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
 
     //Bắt tất cả exception mà không có dưới đây
     @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
+    ResponseEntity<ApiResponse> handlingRuntimeException(Exception exception) {
         log.error("Exception: ", exception);
 
         ApiResponse apiResponse = new ApiResponse();
