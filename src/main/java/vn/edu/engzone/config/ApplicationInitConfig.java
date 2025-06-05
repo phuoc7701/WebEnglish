@@ -42,6 +42,7 @@ public class ApplicationInitConfig {
                         .password(passwordEncoder.encode("admin"))
                         .email("admin@engzone.edu.vn")
                         .roles(roles)
+                        .accountStatus(true)
                         .build();
 
                 userRepository.save(user);

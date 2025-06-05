@@ -22,7 +22,7 @@ public class UserCreationRequest {
     @Email(message = "Email không đúng định dạng")
     String email;
     String fullname;
-    Integer status = 1;
+    Boolean accountStatus = true;
     String role;
     @DobConstraint(min = 2, message = "INVALID_DOB")
     LocalDate dob;

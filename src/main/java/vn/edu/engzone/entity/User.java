@@ -27,8 +27,8 @@ public class User {
     String email;
     String fullname;
     LocalDate dob;
-    @Column(columnDefinition = "INT DEFAULT 1")
-    Integer accountStatus = 1 ;
+    @Column(name = "account_status", nullable = false)
+    Boolean accountStatus = true ;
     String avatarUrl;
     String avatarFileId;
     String gender;
