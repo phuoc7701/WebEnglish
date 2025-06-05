@@ -1,5 +1,6 @@
 package vn.edu.engzone.exception;
 
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import vn.edu.engzone.dto.request.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -95,4 +97,5 @@ public class GlobalExceptionHandler {
                         .message(errorCode.getMessage())
                         .build());
     }
+
 }
