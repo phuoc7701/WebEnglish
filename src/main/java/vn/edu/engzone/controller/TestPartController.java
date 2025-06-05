@@ -1,6 +1,7 @@
 package vn.edu.engzone.controller;
 
 
+import jakarta.validation.Valid;
 import vn.edu.engzone.dto.request.TestPartRequest;
 import vn.edu.engzone.dto.response.TestPartResponse;
 import vn.edu.engzone.entity.TestPart;
@@ -36,7 +37,7 @@ public class TestPartController {
     }
     // Tạo mới một part
     @PostMapping
-    public ResponseEntity<TestPartResponse> createPart(@RequestBody TestPartRequest request) {
+    public ResponseEntity<TestPartResponse> createPart(@Valid @RequestBody TestPartRequest request) {
         // Convert DTO sang entity
         TestPart created = testPartService.createPart(request); // Service này phải nhận TestPartRequest
         // Convert trả về DTO response
@@ -45,7 +46,7 @@ public class TestPartController {
 
     // Cập nhật một part
     @PutMapping("/{id}")
-    public ResponseEntity<TestPartResponse> updatePart(@PathVariable String id, @RequestBody TestPart testPart) {
+    public ResponseEntity<TestPartResponse> updatePart(@PathVariable String id, @Valid @RequestBody TestPart testPart) {
         return testPartService.updatePart(id, testPart)
                 .map(updated -> ResponseEntity.ok(testPartMapper.toDto(updated)))
                 .orElse(ResponseEntity.notFound().build());
