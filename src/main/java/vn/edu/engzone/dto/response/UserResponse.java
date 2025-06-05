@@ -18,6 +18,6 @@ public class UserResponse {
     String fullname;
     String avatarUrl;
     LocalDate dob;
-    Integer accountStatus;
+    Boolean accountStatus;
     Set<RoleResponse> roles;
 }

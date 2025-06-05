@@ -33,9 +33,6 @@ public class UserController {
 
     //api tạo thông tin user
     @PostMapping
-//    User createUser(@RequestBody @Valid UserCreationRequest request) {
-//        return userService.createUser(request);
-//    }
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.createUser(request))
@@ -59,6 +56,16 @@ public class UserController {
     ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getUser(userId))
+                .build();
+    }
+
+    @PutMapping("/{userId}")
+    ApiResponse<UserResponse> updateUser(
+            @PathVariable String userId,
+            @RequestBody @Valid UserUpdateRequest request
+    ) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateUser(userId, request))
                 .build();
     }
 

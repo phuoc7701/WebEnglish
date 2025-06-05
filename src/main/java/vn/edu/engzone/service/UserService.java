@@ -59,6 +59,10 @@ public class UserService {
 
         User user = userMapper.toUser(request);
 
+        if (user.getAccountStatus() == null) {
+            user.setAccountStatus(true);
+        }
+
         // mã hóa mật khẩu cho user
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
@@ -71,9 +75,6 @@ public class UserService {
             emailService.sendEmail(request.getEmail(), "Đăng ký thành công", "Welcome to EngZone!");
         } catch (MessagingException e) {
             throw new RuntimeException(e);
-
-            // Nếu gmail không tồn tại
-
         }
 
         return userMapper.toUserResponse(userRepository.save(user));
@@ -109,7 +110,11 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         userMapper.updateUser(user, request);
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        user.setAccountStatus(request.getAccountStatus());
 
         var roles = roleRepository.findAllById(request.getRoles());
         user.setRoles(new HashSet<>(roles));
