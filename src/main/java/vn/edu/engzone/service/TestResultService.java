@@ -41,7 +41,7 @@ public class TestResultService {
                 logger.info("Checking questionId: " + questionId + ", userAnswer: " + userAnswer + ", correctAnswer: " + correctAnswer);
 
                 if (userAnswer != null && userAnswer.trim().equalsIgnoreCase(correctAnswer.trim())) {
-                    score++;
+                    score = score + 10; // Assuming each question is worth 10 points
 
                 } else {
 
