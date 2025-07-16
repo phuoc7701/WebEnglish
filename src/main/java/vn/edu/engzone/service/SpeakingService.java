@@ -6,13 +6,20 @@ import lombok.AccessLevel;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpHeaders;
+//import org.apache.http.HttpHeaders;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import vn.edu.engzone.dto.response.AIResponse;
+import org.springframework.http.HttpHeaders;
+import vn.edu.engzone.utils.MultipartInputStreamFileResource;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -80,6 +87,35 @@ public class SpeakingService {
         log.info("Parsed content: {}", text);
         return text;
     }
+
+    public String callGemini(String promptText) {
+        List<Map<String, Object>> parts = new ArrayList<>();
+        parts.add(Map.of("text", promptText));
+
+        Map<String, Object> body = Map.of(
+                "contents", List.of(Map.of("parts", parts))
+        );
+
+        JsonNode response = webClient.post()
+                .uri(geminiGenerateUrl + "?key=" + geminiApiKey)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .block();
+
+        if (response == null || !response.has("candidates")) {
+            throw new RuntimeException("Invalid Gemini response");
+        }
+
+        String text = response.get("candidates")
+                .get(0).get("content").get("parts")
+                .get(0).get("text").asText();
+
+        log.info("Parsed content (text-only): {}", text);
+        return text;
+    }
+
     private String uploadFile(MultipartFile file) throws IOException {
         String mimeType = Optional.ofNullable(file.getContentType()).orElse("application/octet-stream");
         long contentLength = file.getSize();
@@ -116,5 +152,23 @@ public class SpeakingService {
 
         return uploadResponse.get("file").get("uri").asText();
     }
+    public String sendAudioToPython(MultipartFile file) throws IOException {
+        String pythonApiUrl = "http://localhost:5001/transcribe"; // URL Flask API
 
+        // Chuẩn bị request
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        // Tạo phần file trong request
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", new MultipartInputStreamFileResource(file.getInputStream(), file.getOriginalFilename()));
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Map> response = restTemplate.postForEntity(pythonApiUrl, requestEntity, Map.class);
+
+        Map<?, ?> result = response.getBody();
+        return result != null ? (String) result.get("text") : "";
+    }
 }

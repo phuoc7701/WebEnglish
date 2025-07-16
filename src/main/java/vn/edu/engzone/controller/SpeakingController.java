@@ -1,5 +1,6 @@
 package vn.edu.engzone.controller;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,7 @@ public class SpeakingController {
         try {
             String aiResponse = speakingService.callGemini(prompt, null);
 //            String text = aiResponse.get;  // hoặc method phù hợp để lấy chuỗi text
+
             return ResponseEntity.ok(Map.of("questionText", aiResponse));
         } catch (IOException e) {
             return ResponseEntity.status(500)
@@ -57,39 +59,42 @@ public class SpeakingController {
             @RequestParam("originalText") String originalText
     ) {
         try {
+            String transcribedText = speakingService.sendAudioToPython(file);
+            System.out.println(transcribedText);
             String pronunciationPrompt = String.format(
                     "Đánh giá phát âm trong đoạn audio với câu: \"%s\". " +
+                            "Đoạn transcript người học đọc lại là: \"%s\". " +
                             "Dùng HTML với <span style='color:red'> đánh dấu từ phát âm sai, " +
                             "<span style='color:green'> đánh dấu từ đúng. " +
                             "Sau đó, liệt kê các lỗi phát âm chính, giải thích chi tiết bằng tiếng Việt cách khắc phục từng lỗi. " +
                             "Trả về kết quả dưới dạng JSON với 2 trường: " +
-                            "\"score\" (điểm phát âm từ 0 đến 100) và \"feedback\" (đoạn HTML có highlight + phần giải thích lỗi). " +
+                            "\"score\" (điểm phát âm từ 0 đến 100 hãy cho điểm chính xác nha nếu đúng hết 100 còn sai hết là 0) và \"feedback\" (đoạn HTML có highlight + phần giải thích lỗi). " +
                             "Chỉ trả về JSON, KHÔNG chèn markdown hay code block.",
-                    originalText
+                    originalText, transcribedText
             );
 
-            String pronunciationResult = speakingService.callGemini(pronunciationPrompt, file);
+            String pronunciationResult = speakingService.callGemini(pronunciationPrompt);
             String jsonText = pronunciationResult.trim();
 
             // Clean up possible markdown/code block
-            if (jsonText.startsWith("```json")) {
-                jsonText = jsonText.substring(7).trim();
-            }
-            if (jsonText.startsWith("```")) {
-                jsonText = jsonText.substring(3).trim();
-            }
-            if (jsonText.endsWith("```")) {
-                jsonText = jsonText.substring(0, jsonText.length() - 3).trim();
-            }
-            if (jsonText.startsWith("`") && jsonText.endsWith("`")) {
-                jsonText = jsonText.substring(1, jsonText.length() - 1).trim();
-            }
 
+            jsonText = jsonText.replaceAll("(?s)```json(.*?)```", "$1").trim();
+            jsonText = jsonText.replaceAll("(?s)```(.*?)```", "$1").trim();
+            jsonText = jsonText.replaceAll("^`+|`+$", "").trim();
             // Parse thành Map trả ra FE
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> evalObj = mapper.readValue(jsonText, Map.class);
+//            ObjectMapper mapper = new ObjectMapper();
+//            Map<String, Object> evalObj = mapper.readValue(jsonText, Map.class);
+//
+//            return ResponseEntity.ok(Collections.singletonMap("pronunciationEvaluation", evalObj));
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, Object> evalObj = mapper.readValue(jsonText, Map.class);
+                return ResponseEntity.ok(Collections.singletonMap("pronunciationEvaluation", evalObj));
+            } catch (JsonParseException je) {
+                return ResponseEntity.status(500)
+                        .body(Map.of("error", "Lỗi định dạng JSON từ AI", "rawResponse", jsonText));
+            }
 
-            return ResponseEntity.ok(Collections.singletonMap("pronunciationEvaluation", evalObj));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500)
